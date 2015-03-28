@@ -1,8 +1,18 @@
 <?php
 /******************************************************************************/
 /*                                                                            */
+/*  This file creates a playlist for Sonerezh <www.sonerezh.bzh> containing   */
+/*  all songs in the database. You should be carefull while using             */
+/*  third-party scripts.                                                      */
 /*                                                                            */
 /*                                                                            */
+/*  THE BEER-WARE LICENSE  (Revision 42):                                     */
+/*                                                                            */
+/*  Nicolas Jeannerod <niols@niols.net> wrote this file. As long as you       */
+/*  retain this notice you can do whatever you want with this stuff. If we    */
+/*  meet some day, and you think this stuff is worth it, you can buy me a     */
+/*  beer in return.                                                           */
+/*                                                      -- Poul-Henning Kamp  */
 /*                                                                            */
 /******************************************************************************/
 
@@ -25,9 +35,9 @@ define ('CHUNK_SIZE', 100);
 
 // Get database config
 require DATABASE_CONFIG_FILE;
-$conf = (new DATABASE_CONFIG) ->  default;
+$conf = (new DATABASE_CONFIG) -> default;
 if ($conf['datasource'] != 'Database/Mysql')
-  die ('Datasource `'. $conf['datasource'] .'` not supported');
+  die ('Datasource '. $conf['datasource'] .' not supported');
 
 
 
@@ -53,24 +63,21 @@ function query_or_die ($sql, $die_message = 'Fatal error', $exec = false)
 
 // Get user, or users
 echo 'Fetching users… ';
+
+$sql = 'SELECT email, id'
+     .' FROM ' . $conf['prefix'] . 'users';
+if (USER) $sql .= ' WHERE email = "' . USER . '"';
+$users = query_or_die ($sql, 'Error while retrieving user\'s id');
+
 if (USER)
 {
-  $sql0 = 'SELECT email, id '
-	. 'FROM ' . $conf['prefix'] . 'users '
-	. 'WHERE email = "' . USER . '"';
-  $users = query_or_die ($sql0, 'Error while retrieving user\'s id');
   if (empty ($users))
     die ('User `' . USER . '` doesn\'t exist.');
   echo 'only user ' . USER . ' [' . $users[0]['id'] . '] concerned.' . PHP_EOL;
 }
 
 else
-{
-  $sql0 = 'SELECT email, id '
-	. 'FROM ' . $conf['prefix'] . 'users ';
-  $users = query_or_die ($sql0, 'Error while retrieving users\' ids');
   echo count ($users) . ' users concerned.' . PHP_EOL;
-}
 
 
 
@@ -119,9 +126,9 @@ foreach ($users as $user)
 
   // Get all songs ids
   echo 'Fetching all songs ids… ';
-  $sql4 = 'SELECT id '
-	. 'FROM ' . $conf['prefix'] . 'songs';
-  $songs = query_or_die ($sql4, 'Error while retrieving songs ids');
+  $sql = 'SELECT id'
+       .' FROM ' . $conf['prefix'] . 'songs';
+  $songs = query_or_die ($sql, 'Error while retrieving songs ids');
   $songs_ids = array_map(function($e){return $e['id'];}, $songs);
   // or if you have PHP>5.5: $songs_ids = array_column ($songs, 'id'));
   echo 'Found ' . count ($songs_ids) . ' songs.' . PHP_EOL;
@@ -130,33 +137,55 @@ foreach ($users as $user)
 
   // Get all songs-in-playlist ids
   echo 'Fetching all songs-in-playlist ids… ';
-  $sql5 = 'SELECT song_id '
-	.	'FROM ' . $conf['prefix'] . 'playlist_memberships '
-	. 'WHERE playlist_id = ' . $playlist_id;
-  $songs_pl = query_or_die ($sql5, 'Error while retrieving songs-in-playlist ids');
+  $sql = 'SELECT song_id'
+       .' FROM ' . $conf['prefix'] . 'playlist_memberships'
+       .' WHERE playlist_id = ' . $playlist_id;
+  $songs_pl = query_or_die ($sql, 'Error while retrieving songs-in-playlist ids');
   $songs_pl_ids = array_map(function($e){return $e['song_id'];}, $songs_pl);
   // or if you have PHP>5.5: $songs_pl_ids = array_column ($songs_pl, 'song_id'));
   echo 'Found ' . count ($songs_pl_ids) . ' songs.' . PHP_EOL;
 
-  $songs_ids = array_diff ($songs_ids, $songs_pl_ids);
-  echo count ($songs_ids) . ' songs remaining.' . PHP_EOL;
+  $songs_to_add_ids = array_diff ($songs_ids, $songs_pl_ids);
+  echo count ($songs_to_add_ids) . ' songs to add.' . PHP_EOL;
+  $songs_to_del_ids = array_diff ($songs_pl_ids, $songs_ids);
+  echo count ($songs_to_add_ids) . ' songs to delete.' . PHP_EOL;
+
+
+
+  // Delete old songs
+  echo 'Deleting bad songs from playlist… ';
+  $sql = 'DELETE FROM ' . $conf['prefix'] . 'playlist_memberships'
+       .' WHERE playlist_id = ' . $playlist_id . ' AND ';
+  $total = count ($songs_to_del_ids);
+  $songs_chunks = array_chunk ($songs_to_del_ids, CHUNK_SIZE);
+  echo "\r";
+  foreach ($songs_chunks as $key => $chunk)
+  {
+    echo 'Deleting bad songs from playlist… ' . ($key * CHUNK_SIZE) . ' on ' . $total . "\r";
+    $chunk = array_map (function ($id){return "song_id = $id";}, $chunk);
+    query_or_die ($sql . '(' . implode (' OR ', $chunk) . ')',
+		  'Error while deleting songs from playlist.', true);
+  }
+  echo 'Deleting bad songs from playlist… ' . $total . ' on ' . $total . PHP_EOL;
 
 
 
   // Add all new songs
   echo 'Adding all songs to playlist… ';
-  $sql6 = 'INSERT INTO ' . $conf['prefix'] . 'playlist_memberships '
-	. '(playlist_id, song_id, sort) VALUES ';
-  $total = count ($songs_ids);
-  $songs_ids_chunks = array_chunk ($songs_ids, CHUNK_SIZE);
+  $sql = 'INSERT INTO ' . $conf['prefix'] . 'playlist_memberships'
+       .' (playlist_id, song_id, sort) VALUES ';
+  $total = count ($songs_to_add_ids);
+  $songs_chunks = array_chunk ($songs_to_add_ids, CHUNK_SIZE);
   echo "\r";
-  foreach ($songs_ids_chunks as $key => $chunk)
+  foreach ($songs_chunks as $key => $chunk)
   {
     echo 'Adding all songs to playlist… ' . ($key * CHUNK_SIZE) . ' on ' . $total . "\r";
-    $chunk = array_map (function ($id) use ($playlist_id){return "($playlist_id,$id,$id)";}, $chunk);
-    query_or_die ($sql6 . implode (',', $chunk), 'Error while adding songs to playlist.', true);
+    $chunk = array_map (function ($id) use ($playlist_id)
+			{return "($playlist_id,$id,$id)";}, $chunk);
+    query_or_die ($sql . implode (',', $chunk),
+		  'Error while adding songs to playlist.', true);
   }
-  echo 'Adding all songs to playlist… Done.' . PHP_EOL;
+  echo 'Adding all songs to playlist… ' . $total . ' on ' . $total . PHP_EOL;
 
 
 
