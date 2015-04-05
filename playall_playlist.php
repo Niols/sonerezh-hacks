@@ -142,7 +142,7 @@ foreach ($users as $user)
   $songs_to_add_ids = array_diff ($songs_ids, $songs_pl_ids);
   echo count ($songs_to_add_ids) . ' songs to add.' . PHP_EOL;
   $songs_to_del_ids = array_diff ($songs_pl_ids, $songs_ids);
-  echo count ($songs_to_add_ids) . ' songs to delete.' . PHP_EOL;
+  echo count ($songs_to_del_ids) . ' songs to delete.' . PHP_EOL;
 
 
 
