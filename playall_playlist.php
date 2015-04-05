@@ -17,9 +17,6 @@
 /******************************************************************************/
 
 
-// Path to sonerezh's database config file.
-define ('DATABASE_CONFIG_FILE', '../sonerezh/app/Config/database.php');
-
 // Name of the account. If evaluates to false, all accounts will be concerned.
 //define ('USER',                 'nicojpub@gmail.com');
 define ('USER',                 false);
@@ -32,18 +29,15 @@ define ('CHUNK_SIZE', 100);
 
 
 
-
 // Get database config
-require DATABASE_CONFIG_FILE;
-$conf = (new DATABASE_CONFIG) -> default;
-if ($conf['datasource'] != 'Database/Mysql')
-  die ('Datasource '. $conf['datasource'] .' not supported');
+require 'inc/database_config.php';
+$conf = get_database_config ();
 
 
 
 // Instantiate PDO
-$dsn = 'mysql:dbname=' . $conf['database'] . ';host=' . $conf['host'];
-$pdo = new PDO ($dsn, $conf['login'], $conf['password']);
+$dsn = 'mysql:dbname=' . $conf->database . ';host=' . $conf->host;
+$pdo = new PDO ($dsn, $conf->login, $conf->password);
 
 
 
@@ -65,7 +59,7 @@ function query_or_die ($sql, $die_message = 'Fatal error', $exec = false)
 echo 'Fetching users… ';
 
 $sql = 'SELECT email, id'
-     .' FROM ' . $conf['prefix'] . 'users';
+     .' FROM ' . $conf->prefix . 'users';
 if (USER) $sql .= ' WHERE email = "' . USER . '"';
 $users = query_or_die ($sql, 'Error while retrieving user\'s id');
 
@@ -91,7 +85,7 @@ foreach ($users as $user)
   // Get playlist's id. Create it if needed.
   echo 'Fetching playlist… ';
   $sql1 = 'SELECT id '
-	. 'FROM ' . $conf['prefix'] . 'playlists '
+	. 'FROM ' . $conf->prefix . 'playlists '
 	. 'WHERE title = "' . PLAYLIST . '" '
 	. 'AND user_id = "' . $user['id'] . '"';
   $playlists = query_or_die ($sql1, 'Error while retrieving playlists');
@@ -100,7 +94,7 @@ foreach ($users as $user)
   if (empty ($playlists))
   {
     echo 'Playlist does not exist.' . PHP_EOL . 'Creating playlist… ';
-    $sql2 = 'INSERT INTO ' . $conf['prefix'] . 'playlists '
+    $sql2 = 'INSERT INTO ' . $conf->prefix . 'playlists '
 	  . '(title, created, modified, user_id) '
 	  . 'VALUES ("'.PLAYLIST.'", "'.$now.'", "'.$now.'", '.$user['id'].')';
     query_or_die ($sql2, 'Error while inserting playlist', true);
@@ -115,7 +109,7 @@ foreach ($users as $user)
   {
     $playlist_id = $playlists[0]['id'];
     echo 'Found playlist ' . PLAYLIST . ' [' . $playlist_id . ']' . PHP_EOL;
-    $sql3 = 'UPDATE ' . $conf['prefix'] . 'playlists '
+    $sql3 = 'UPDATE ' . $conf->prefix . 'playlists '
 	  . 'SET modified = "' . $now . '" '
 	  . 'WHERE id = ' . $playlist_id;
     query_or_die ($sql3, 'Error while updating playlist', true);
@@ -127,7 +121,7 @@ foreach ($users as $user)
   // Get all songs ids
   echo 'Fetching all songs ids… ';
   $sql = 'SELECT id'
-       .' FROM ' . $conf['prefix'] . 'songs';
+       .' FROM ' . $conf->prefix . 'songs';
   $songs = query_or_die ($sql, 'Error while retrieving songs ids');
   $songs_ids = array_map(function($e){return $e['id'];}, $songs);
   // or if you have PHP>5.5: $songs_ids = array_column ($songs, 'id'));
@@ -138,7 +132,7 @@ foreach ($users as $user)
   // Get all songs-in-playlist ids
   echo 'Fetching all songs-in-playlist ids… ';
   $sql = 'SELECT song_id'
-       .' FROM ' . $conf['prefix'] . 'playlist_memberships'
+       .' FROM ' . $conf->prefix . 'playlist_memberships'
        .' WHERE playlist_id = ' . $playlist_id;
   $songs_pl = query_or_die ($sql, 'Error while retrieving songs-in-playlist ids');
   $songs_pl_ids = array_map(function($e){return $e['song_id'];}, $songs_pl);
@@ -154,7 +148,7 @@ foreach ($users as $user)
 
   // Delete old songs
   echo 'Deleting bad songs from playlist… ';
-  $sql = 'DELETE FROM ' . $conf['prefix'] . 'playlist_memberships'
+  $sql = 'DELETE FROM ' . $conf->prefix . 'playlist_memberships'
        .' WHERE playlist_id = ' . $playlist_id . ' AND ';
   $total = count ($songs_to_del_ids);
   $songs_chunks = array_chunk ($songs_to_del_ids, CHUNK_SIZE);
@@ -172,7 +166,7 @@ foreach ($users as $user)
 
   // Add all new songs
   echo 'Adding all songs to playlist… ';
-  $sql = 'INSERT INTO ' . $conf['prefix'] . 'playlist_memberships'
+  $sql = 'INSERT INTO ' . $conf->prefix . 'playlist_memberships'
        .' (playlist_id, song_id, sort) VALUES ';
   $total = count ($songs_to_add_ids);
   $songs_chunks = array_chunk ($songs_to_add_ids, CHUNK_SIZE);
