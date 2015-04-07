@@ -64,5 +64,3 @@ echo 'Calculating songs to add… ';
 $songs_to_add = array_diff ($real_songs, $registered_songs);
 echo 'Found ' . count ($songs_to_add) . ' songs.' . PHP_EOL;
 */
-
-print_r ($songs_to_add);
