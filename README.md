@@ -12,7 +12,7 @@ You don't need to do much to install these scripts. Just clone or download this 
 All these scripts are CLI. Use them directly in console:
 
     php randomalbum_playlist.php
-    php randomalbum_playlist.php > randomalbum_playlist.php
+    php randomalbum_playlist.php > randomalbum_playlist.log
 
 
 Detail
@@ -20,8 +20,8 @@ Detail
 
 ### clean_database
 
-**WIP. Not functionnal yet.**  
-Should give a script that deletes from database files that aren't anymore present on disk.
+Deletes from database songs that aren't on disk anymore. It's cool since Sonerezh's database update doesn't do that for the moment.
+TODO: delete doubles from database.
 
 ### playall_playlist
 
@@ -40,7 +40,10 @@ Crontab
 
 Personnaly I'm using them in a crontab. Here is this file:
 
-     0 0 * * *     cd /path/to/sonerezh-hacks/ && php randomalbum_playlist.php >> randomalbum_playlist.log
-    10 0 * * *     cd /path/to/sonerezh-hacks/ && php playall_playlist.php >> playall_playlist.log
+    50 23 * * *     cd /path/to/sonerezh-hacks/ && php clean_database.php >> clean_database.log
+     0  0 * * *     cd /path/to/sonerezh-hacks/ && php randomalbum_playlist.php >> randomalbum_playlist.log
+    10  0 * * *     cd /path/to/sonerezh-hacks/ && php playall_playlist.php >> playall_playlist.log
 
-The first says that the random album (album of the day) changes everyday at 0:00. The second that the play all playlist is updated everyday at 0:10 (so that I'm almost sure you will have Album of the day higher than Play All in list, and Sonerezh wont lag ;) ).
+The first line says that the database will be cleaned everyday at 23:50.
+The second line says that the random album (Album of the day) will change everyday at 0:00.
+And the third line says that the All songs playlist will be updated everyday at 0:10 (so that I'm almost sure I'll have Album of the day higher than All songs in playlists list, which means Sonerezh wont lag for other playlists).
