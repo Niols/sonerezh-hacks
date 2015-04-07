@@ -2,6 +2,16 @@
 
 require 'init.php';
 
+if (file_exists ('config.php'))
+  require 'config.php';
+else
+{
+  echo "Can't find the config.php file.\nCopy config.sample.php and personalize it.\n";
+  exit (1);
+}  
+
+require 'database.php';
+
 if (isset ($argv[1]))
 {
   switch ($argv[1])
