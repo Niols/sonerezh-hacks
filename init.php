@@ -15,3 +15,6 @@ if (! function_exists ('array_column'))
 
 // The print_array function, to pretty print results
 require 'inc/print_array.php';
+
+//
+require 'inc/ask_for.php';
