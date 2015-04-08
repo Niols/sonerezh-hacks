@@ -1,14 +1,29 @@
 <?php
 
-if (isset ($argv[2]))
+class help
 {
-  switch ($argv[2])
-  {
-    case 'help':
-      echo 'Prints the following help:' . PHP_EOL . PHP_EOL;
-      break;
 
-    default:
-      echo "Help: Unknown argument: ${argv[2]}" . PHP_EOL . PHP_EOL;
+  static function _help ($args)
+  {
+    echo "Prints the following help:\n\n";
   }
+
+  static function _users ($args)
+  {
+    global $argv0;
+
+    echo <<<END
+Usages:
+
+   {$argv0} users list
+
+   {$argv0} users delete [email] [force]
+      If you don't give email, it'll be prompted.
+      If you don't add 'force', confirmation will be asked.
+
+
+END;
+  }
+
 }
+

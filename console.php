@@ -2,38 +2,35 @@
 
 require 'init.php';
 
-if (isset ($argv[1]))
+$argv0 = array_shift ($argv);
+$command = array_shift ($argv);
+$arg = array_shift ($argv);
+
+if (in_array ($command, ['help', 'playlist_memberships', 'playlists', 'settings', 'songs', 'users']))
 {
-  switch ($argv[1])
+  if (method_exists ($command, "_$arg"))
   {
-    case 'help':
-      require 'scripts/help.php';
-      break;
+    $result = call_user_func ([$command, "_$arg"], array_values ($argv));
+    if ($result === false)
+      die ("Fatal error.\n");
 
-    case 'playlist_memberships':
-      require 'scripts/playlist_memberships.php';
-      break;
-
-    case 'playlists':
-      require 'scripts/playlists.php';
-      break;
-
-    case 'settings':
-      require 'scripts/settings.php';
-      break;
-
-    case 'songs':
-      require 'scripts/songs.php';
-      break;
-
-    case 'users':
-      require 'scripts/users.php';
-      break;
+    else if ($result !== null)
+    {
+      print_array ($result);
+      exit;
+    }
   }
+
+  else if ($arg)
+    echo "Unkown argument: $arg\n\n";
 }
 
+else if ($command)
+  echo "Unkown command: $command\n\n";
+
+
 echo <<<END
-Usage: ${argv[0]} [command] [arguments]
+Usage: ${argv0} [command] [arguments]
 
 Command:
    help
@@ -43,6 +40,6 @@ Command:
    songs
    users
 
-Try: ${argv[0]} help [command].
+Try: ${argv0} help [command].
 
 END;

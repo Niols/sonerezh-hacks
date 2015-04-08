@@ -19,3 +19,11 @@ require 'inc/read_array.php';
 
 //
 require 'inc/ask_for.php';
+
+// Scripts
+require 'scripts/help.php';
+require 'scripts/playlist_memberships.php';
+require 'scripts/playlists.php';
+require 'scripts/settings.php';
+require 'scripts/songs.php';
+require 'scripts/users.php';
