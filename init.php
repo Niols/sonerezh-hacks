@@ -13,8 +13,9 @@ require 'database.php';
 if (! function_exists ('array_column'))
   require 'inc/php-5.5/array_column.php';
 
-// The print_array function, to pretty print results
+// The print_array function and his collegue read_array.
 require 'inc/print_array.php';
+require 'inc/read_array.php';
 
 //
 require 'inc/ask_for.php';
