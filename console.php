@@ -2,44 +2,33 @@
 
 require 'init.php';
 
-if (file_exists ('config.php'))
-  require 'config.php';
-else
-{
-  echo "Can't find the config.php file.\nCopy config.sample.php and personalize it.\n";
-  exit (1);
-}  
-
-require 'database.php';
-
 if (isset ($argv[1]))
 {
   switch ($argv[1])
   {
     case 'help':
       require 'scripts/help.php';
-      //exit; // No exit after help: print global help
-      break;  // So, don't forget break
+      break;
 
     case 'playlist_memberships':
       require 'scripts/playlist_memberships.php';
-      exit;
+      break;
 
     case 'playlists':
       require 'scripts/playlists.php';
-      exit;
+      break;
 
     case 'settings':
       require 'scripts/settings.php';
-      exit;
+      break;
 
     case 'songs':
       require 'scripts/songs.php';
-      exit;
+      break;
 
     case 'users':
       require 'scripts/users.php';
-      exit;
+      break;
   }
 }
 
