@@ -2,7 +2,7 @@
 
 function print_array ($array, $keys = null)
 {
-  if ($keys === null) $keys = array_keys ($array);
+  if ($keys === null) $keys = array_keys ($array[0]);
   $sizes = array_fill_keys ($keys, 0);
   foreach ($array as $line)
   {
