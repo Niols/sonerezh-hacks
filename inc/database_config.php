@@ -1,7 +1,7 @@
 <?php
 
 // Path to sonerezh's database config file.
-define ('DATABASE_CONFIG_FILE', '../sonerezh/app/Config/database.php');
+define ('DATABASE_CONFIG_FILE', '../../www/sonerezh/app/Config/database.php');
 
 require DATABASE_CONFIG_FILE;
 

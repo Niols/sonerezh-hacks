@@ -19,14 +19,16 @@
 require 'inc/php-5.5/array_column.php';
 
 require 'inc/database_config.php';
+require 'inc/config.php';
 
-$conf = get_database_config ();
+$database_conf = get_database_config ();
+$conf = $CONFIG
 
 $dsn = 'mysql:'
-     . 'dbname=' . $conf->database . ';'
-     . 'host=' . $conf->host . ';'
+     . 'dbname=' . $database_conf->database . ';'
+     . 'host=' . $database_conf->host . ';'
      . 'charset=utf8';
-$pdo = new PDO ($dsn, $conf->login, $conf->password);
+$pdo = new PDO ($dsn, $database_conf->login, $database_conf->password);
 
 function query_or_die ($sql, $die_message = 'Fatal error', $exec = false)
 {
@@ -46,7 +48,7 @@ $registered_songs = array_column ($registered_songs, 'source_path');
 echo 'Found ' . count ($registered_songs) . ' songs.' . PHP_EOL;
 
 echo 'Retrieving present songs… ';
-exec ('find /home/music/music/', $real_songs);
+exec ('find' + $conf['MUSIC_DIRECTORY'], $real_songs);
 echo 'Found ' . count ($real_songs) . ' songs.' . PHP_EOL;
 
 echo 'Calculating songs to delete… ';
