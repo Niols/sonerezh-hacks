@@ -19,6 +19,7 @@
 require 'inc/php-5.5/array_column.php';
 
 require 'inc/database_config.php';
+require 'inc/config.php';
 
 $database_conf = get_database_config ();
 $conf = $CONFIG
@@ -47,7 +48,7 @@ $registered_songs = array_column ($registered_songs, 'source_path');
 echo 'Found ' . count ($registered_songs) . ' songs.' . PHP_EOL;
 
 echo 'Retrieving present songs… ';
-exec ('find /home/music/music/', $real_songs);
+exec ('find' + $conf['MUSIC_DIRECTORY'], $real_songs);
 echo 'Found ' . count ($real_songs) . ' songs.' . PHP_EOL;
 
 echo 'Calculating songs to delete… ';
