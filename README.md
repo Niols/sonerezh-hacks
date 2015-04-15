@@ -8,6 +8,7 @@ Install
 -------
 
 You don't need to do much to install these scripts. Just clone or download this repository, and write in `inc/database_config.php` where you can find the Sonerezh database config file. The path can be absolute or relative, **from the root of the Sonerezh-hacks dir location** to this file, that, by default, is in `app/Config/database.php`.
+You can also modify `inc/config.php` to match your configuration.
 
 All these scripts are CLI. Use them directly in console:
 
