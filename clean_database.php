@@ -20,13 +20,14 @@ require 'inc/php-5.5/array_column.php';
 
 require 'inc/database_config.php';
 
-$conf = get_database_config ();
+$database_conf = get_database_config ();
+$conf = $CONFIG
 
 $dsn = 'mysql:'
-     . 'dbname=' . $conf->database . ';'
-     . 'host=' . $conf->host . ';'
+     . 'dbname=' . $database_conf->database . ';'
+     . 'host=' . $database_conf->host . ';'
      . 'charset=utf8';
-$pdo = new PDO ($dsn, $conf->login, $conf->password);
+$pdo = new PDO ($dsn, $database_conf->login, $database_conf->password);
 
 function query_or_die ($sql, $die_message = 'Fatal error', $exec = false)
 {
